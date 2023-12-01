@@ -1,0 +1,42 @@
+{
+  "name": "android-audioplayer",
+  "version": "0.1.0",
+  "description": "This module has functions which can use multiple media players and return their AudioSessionId for usage in other modules.",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module",
+    "open:ios": "open -a \"Xcode\" example/ios",
+    "open:android": "open -a \"Android Studio\" example/android"
+  },
+  "keywords": [
+    "react-native",
+    "expo",
+    "android-audioplayer",
+    "AndroidAudioplayer"
+  ],
+  "repository": "https://github.com/SudharsanSaravanan9122008/android-audioplayer",
+  "bugs": {
+    "url": "https://github.com/SudharsanSaravanan9122008/android-audioplayer/issues"
+  },
+  "author": "SudharsanSaravanan9122008 <sudharsansaravanan12@gmail.com> (https://github.com/SudharsanSaravanan9122008)",
+  "license": "MIT",
+  "homepage": "https://github.com/SudharsanSaravanan9122008/android-audioplayer#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/react": "^18.0.25",
+    "expo-module-scripts": "^3.0.11",
+    "expo-modules-core": "^1.5.11"
+  },
+  "peerDependencies": {
+    "expo": "*",
+    "react": "*",
+    "react-native": "*"
+  }
+}

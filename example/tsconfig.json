@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "android-audioplayer": ["../src/index"],
+      "android-audioplayer/*": ["../src/*"]
+    }
+  }
+}
