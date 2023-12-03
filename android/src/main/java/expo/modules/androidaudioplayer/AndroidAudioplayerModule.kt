@@ -2,46 +2,87 @@ package expo.modules.androidaudioplayer
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
+import android.media.MediaPlayer
+import android.media.AudioAttributes
+import androidx.core.os.bundleOf
 
 class AndroidAudioplayerModule : Module() {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
   override fun definition() = ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('AndroidAudioplayer')` in JavaScript.
     Name("AndroidAudioplayer")
+    Events("onPrepared")
 
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants(
-      "PI" to Math.PI
-    )
+    var mediaPlayers = arrayOf<MediaPlayer>()
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
+    fun createMediaPlayer(): Int{
+      var mediaPlayer = MediaPlayer()
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      "Hello world! 👋"
+      val playerId = mediaPlayers.size
+      mediaPlayers+=mediaPlayer
+      return playerId
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { value: String ->
-      // Send an event to JavaScript.
-      sendEvent("onChange", mapOf(
-        "value" to value
-      ))
-    }
-
-    // Enables the module to be used as a native view. Definition components that are accepted as part of
-    // the view definition: Prop, Events.
-    View(AndroidAudioplayerView::class) {
-      // Defines a setter for the `name` prop.
-      Prop("name") { view: AndroidAudioplayerView, prop: String ->
-        println(prop)
+    fun initPlayer(playerId: Int){
+      var mediaPlayer = mediaPlayers[playerId]
+      mediaPlayer.apply{
+        setAudioAttributes(
+                AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .build()
+        )
       }
+      mediaPlayers[playerId].setOnPreparedListener{
+        this@AndroidAudioplayerModule.sendEvent("onPrepared", bundleOf("playerId" to playerId))
+      }
+    }
+
+    Function("createMediaPlayer"){
+      val id = createMediaPlayer()
+      initPlayer(id)
+      id
+    }
+
+    Function("getAudioSessionId"){
+      playerId: Int -> mediaPlayers[playerId].getAudioSessionId()
+    }
+
+
+    Function("releaseResources") { playerId: Int ->
+      mediaPlayers[playerId].release()
+    }
+
+    AsyncFunction("setAudioTrackUrl"){
+      playerId: Int, url:String ->
+      mediaPlayers[playerId].stop()
+      mediaPlayers[playerId].setDataSource(url)
+      mediaPlayers[playerId].prepareAsync()
+    }
+
+    Function("getPlaybackCurrentPosition"){
+      playerId: Int -> mediaPlayers[playerId].getCurrentPosition()
+    }
+
+    Function("getPlaybackMaxDuration"){
+      playerId: Int ->
+      mediaPlayers[playerId].start()
+      mediaPlayers[playerId].pause()
+      mediaPlayers[playerId].getDuration()
+    }
+
+    Function("seekTo"){
+      playerId: Int, seekTo_msec: Int -> mediaPlayers[playerId].seekTo(seekTo_msec)
+    }
+
+    Function("playMusic"){
+      playerId: Int -> mediaPlayers[playerId].apply{
+        start()
+    }
+    }
+
+    Function("pauseMusic"){
+      playerId: Int -> mediaPlayers[playerId].apply{
+        pause()
+    }
     }
   }
 }

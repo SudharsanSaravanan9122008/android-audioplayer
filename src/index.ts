@@ -1,26 +1,54 @@
 import { NativeModulesProxy, EventEmitter, Subscription } from 'expo-modules-core';
-
 // Import the native module. On web, it will be resolved to AndroidAudioplayer.web.ts
 // and on native platforms to AndroidAudioplayer.ts
 import AndroidAudioplayerModule from './AndroidAudioplayerModule';
-import AndroidAudioplayerView from './AndroidAudioplayerView';
-import { ChangeEventPayload, AndroidAudioplayerViewProps } from './AndroidAudioplayer.types';
+const emitter = new EventEmitter(AndroidAudioplayerModule);
 
-// Get the native constant value.
-export const PI = AndroidAudioplayerModule.PI;
+export type OnPreparedListener = {
+  playerId: number;
+};
 
-export function hello(): string {
-  return AndroidAudioplayerModule.hello();
+
+export function createMediaPlayer(): number {
+  return AndroidAudioplayerModule.createMediaPlayer();
 }
 
-export async function setValueAsync(value: string) {
-  return await AndroidAudioplayerModule.setValueAsync(value);
+export function getAudioSessionId(playerId: number): number {
+  return AndroidAudioplayerModule.getAudioSessionId(playerId);
 }
 
-const emitter = new EventEmitter(AndroidAudioplayerModule ?? NativeModulesProxy.AndroidAudioplayer);
-
-export function addChangeListener(listener: (event: ChangeEventPayload) => void): Subscription {
-  return emitter.addListener<ChangeEventPayload>('onChange', listener);
+export async function setAudioTrackUrl(playerId: number, url: string): Promise<void> {
+  await AndroidAudioplayerModule.setAudioTrackUrl(playerId, url);
 }
 
-export { AndroidAudioplayerView, AndroidAudioplayerViewProps, ChangeEventPayload };
+export function getPlaybackMaxDuration(playerId: number): number {
+  return AndroidAudioplayerModule.getPlaybackMaxDuration(playerId);
+}
+
+export function seekTo(playerId: number, seekTo_msec: number): void {
+  AndroidAudioplayerModule.seekTo(playerId, seekTo_msec);
+}
+
+export function playMusic(playerId: number): void {
+  AndroidAudioplayerModule.playMusic(playerId);
+}
+
+export function pauseMusic(playerId: number): void {
+  AndroidAudioplayerModule.pauseMusic(playerId);
+}
+
+export function stopMusic(playerId: number): void {
+  AndroidAudioplayerModule.stopMusic(playerId);
+}
+
+export function releaseResources(playerId: number): void {
+  AndroidAudioplayerModule.releaseResources(playerId);
+}
+
+export function getPlaybackCurrentPosition(playerId: number): number{
+  return AndroidAudioplayerModule.getPlaybackCurrentPosition(playerId);
+}
+
+export function addOnPreparedListener(listener: (event: OnPreparedListener) => void): Subscription {
+  return emitter.addListener<OnPreparedListener>('onPrepared', listener);
+}
