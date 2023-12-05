@@ -14,30 +14,32 @@ export default class App extends Component {
       trackPosition: 0,
       state: "pause",
       tempTrackPosition: 0,
-      tempTrackSliding: false
+      tempTrackSliding: false,
+      isPlaybackComplete: false
     }
     this.getAudioSessionIDSchedule;
     this.mediaPlayer = createRef();
   }
 
-  componentDidMount() {
-    
-  }
-
-  componentDidUpdate(){
-    console.log(this.state.audioSessionId);
-    this.mediaPlayer.current.listenToTrackProgress((json) => {
-      this.setState({
-        ...json
-      })
-    });
-  }
-
-
   render() {
     return (
       <View style={styles.container}>
-        <AndroidAudioPlayer ref={this.mediaPlayer} onInitCallback={(audioSessionId)=>this.setState({audioSessionId:audioSessionId})}/>
+        <AndroidAudioPlayer
+          ref={this.mediaPlayer}
+          onInitCallback={(audioSessionId) => this.setState({ audioSessionId: audioSessionId })}
+          listenerToTrackProgress={(json) => {
+            this.setState({
+              ...json
+            })
+          }}
+          onPlaybackComplete={()=>{
+            this.setState({
+              isPlaybackComplete: true,
+              state:"pause"
+            })
+            console.warn("Playback completed");
+          }}
+        />
         {
           this.mediaPlayer.current !== null ?
             (
@@ -79,7 +81,7 @@ export default class App extends Component {
               </View>
             ) : null
         }
-        <Button title='log' onPress={()=>this.setState({})}/>
+        <Button title='log' onPress={() => this.setState({})} />
       </View>
     )
   }

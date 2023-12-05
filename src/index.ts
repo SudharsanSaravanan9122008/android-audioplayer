@@ -1,11 +1,13 @@
 import { Component } from "react";
 import * as AAP from './AndroidAudioplayerModule';
-import { playMusic, OnPreparedListener, createMediaPlayer, getAudioSessionId, setAudioTrackUrl, getPlaybackCurrentPosition, getPlaybackMaxDuration, seekTo, pauseMusic, stopMusic, releaseResources, addOnPreparedListener, addOnInitListener } from './AndroidAudioplayerModule';
+import { playMusic, OnPreparedListener, createMediaPlayer, getAudioSessionId, setAudioTrackUrl, getPlaybackCurrentPosition, getPlaybackMaxDuration, seekTo, pauseMusic, stopMusic, releaseResources, addOnPreparedListener } from './AndroidAudioplayerModule';
 
 
 interface AndroidAudioPlayerProps {
     onInitCallback: ((audioSessionId: number) => void) | null;
- }
+    listenerToTrackProgress: ((progress: {trackPosition: number, trackDuration: number}) => void) | null;
+    onPlaybackComplete: ()=>void;
+}
 
 interface AndroidAudioPlayerState {
     trackDuration: number;
@@ -23,7 +25,6 @@ export default class AndroidAudioPlayer extends Component<
     AndroidAudioPlayerProps,
     AndroidAudioPlayerState
 > {
-    private listenerToTrackProgress: ((progress: { trackPosition: number; trackDuration: number }) => void) | null = null;
 
     constructor(props: AndroidAudioPlayerProps) {
         super(props);
@@ -45,9 +46,10 @@ export default class AndroidAudioPlayer extends Component<
     }
 
     componentDidMount() {
-        const id = AAP.createMediaPlayer();
+        var id = AAP.createMediaPlayer();
         this.setState({
             playerId: id,
+            audioSessionId: AAP.getAudioSessionId(id)
         });
         AAP.addOnPreparedListener(({ playerId: preparedPlayerId }) => {
             if (preparedPlayerId === id) {
@@ -57,25 +59,32 @@ export default class AndroidAudioPlayer extends Component<
                 });
             }
         });
-        AAP.addOnInitListener(({ audioSessionId: audioSessionId }) => {
-            this.setState({
-                audioSessionId: audioSessionId
-            })
-            if(this.props.onInitCallback !== null) this.props.onInitCallback(audioSessionId);
-        })
+        if (this.props.onInitCallback !== null) {
+            this.props.onInitCallback(AAP.getAudioSessionId(id));
+        };
+
         setInterval(() => {
             if (this.state.isPrepared && this.state.state === "play") {
                 this.setState({
-                    trackPosition: AAP.getPlaybackCurrentPosition(this.state.playerId!),
+                    trackPosition: this.state.trackPosition+100,
                 });
             }
-            if (this.state.isPrepared && this.listenerToTrackProgress !== null) {
-                this.listenerToTrackProgress({
+            if (this.state.isPrepared && this.props.listenerToTrackProgress !== null) {
+                this.props.listenerToTrackProgress({
                     trackPosition: this.state.trackPosition,
                     trackDuration: this.state.trackDuration,
                 });
             }
-        }, 1000);
+            if(this.state.state ==="play" && (this.state.trackPosition >= this.state.trackDuration) && this.state.isPrepared){
+                this.setState({
+                    trackPosition: 0,
+                    state: "pause",
+                })
+                AAP.pauseMusic(this.state.playerId!);
+                AAP.seekTo(this.state.playerId!, 0);
+                this.props.onPlaybackComplete();
+            }
+        }, 100);
     }
 
     componentDidUpdate() {
@@ -125,17 +134,13 @@ export default class AndroidAudioPlayer extends Component<
         return response;
     }
 
-    listenToTrackProgress(callback: (progress: { trackPosition: number; trackDuration: number }) => void) {
-        this.listenerToTrackProgress = callback;
-    }
-
     getAudioSessionId() {
         return this.state.audioSessionId
     }
 
     playMusic() {
         this.setState({
-            state: "play",
+            state: "play"
         });
     }
 
@@ -157,4 +162,4 @@ function convertMillisToFormattedString(millis: number) {
     return `${min}:${sec < 10 ? "0" + sec : sec}`;
 }
 
-export { convertMillisToFormattedString, playMusic, OnPreparedListener, addOnInitListener, createMediaPlayer, getAudioSessionId, setAudioTrackUrl, getPlaybackCurrentPosition, getPlaybackMaxDuration, seekTo, pauseMusic, stopMusic, releaseResources, addOnPreparedListener };
+export { convertMillisToFormattedString, playMusic, OnPreparedListener, createMediaPlayer, getAudioSessionId, setAudioTrackUrl, getPlaybackCurrentPosition, getPlaybackMaxDuration, seekTo, pauseMusic, stopMusic, releaseResources, addOnPreparedListener };

@@ -9,10 +9,6 @@ export type OnPreparedListener = {
   playerId: number;
 };
 
-export type OnInitListener = {
-    audioSessionId: number;
-}
-
 
 export function createMediaPlayer(): number {
   return AndroidAudioplayerModule.createMediaPlayer();
@@ -56,8 +52,4 @@ export function getPlaybackCurrentPosition(playerId: number): number{
 
 export function addOnPreparedListener(listener: (event: OnPreparedListener) => void): Subscription {
   return emitter.addListener<OnPreparedListener>('onPrepared', listener);
-}
-
-export function addOnInitListener(listener: (event: OnInitListener) => void): Subscription {
-    return emitter.addListener<OnInitListener>('onInit', listener);
 }

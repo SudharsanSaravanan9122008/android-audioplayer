@@ -10,7 +10,6 @@ class AndroidAudioplayerModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("AndroidAudioplayer")
     Events("onPrepared")
-    Events("onInit")
     var mediaPlayers = arrayOf<MediaPlayer>()
 
     fun createMediaPlayer(): Int{
@@ -39,8 +38,6 @@ class AndroidAudioplayerModule : Module() {
     Function("createMediaPlayer"){
       val id = createMediaPlayer()
       initPlayer(id)
-      val audioSessionId = mediaPlayers[id].getAudioSessionId()
-      this@AndroidAudioplayerModule.sendEvent("onInit", bundleOf("audioSessionId" to audioSessionId))
       id
     }
 
