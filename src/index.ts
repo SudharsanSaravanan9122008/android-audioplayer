@@ -5,13 +5,15 @@ import { playMusic, OnPreparedListener, createMediaPlayer, getAudioSessionId, se
 
 interface AndroidAudioPlayerProps {
     onInitCallback: ((audioSessionId: number) => void) | null;
-    listenerToTrackProgress: ((progress: {trackPosition: number, trackDuration: number}) => void) | null;
-    onPlaybackComplete: ()=>void;
+    listenerToTrackProgress: ((progress: { trackPosition: number, trackDuration: number }) => void) | null;
+    onPlaybackComplete: () => void;
 }
 
 interface AndroidAudioPlayerState {
     trackDuration: number;
     trackPosition: number;
+    tempTrackStartTime: number;
+    tempTrackStartPos: number;
     seekTo: boolean;
     playerId: number | null;
     trackUrl: string;
@@ -31,6 +33,8 @@ export default class AndroidAudioPlayer extends Component<
         this.state = {
             trackDuration: 0,
             trackPosition: 0,
+            tempTrackStartTime: 0,
+            tempTrackStartPos: 0,
             seekTo: false,
             playerId: null,
             trackUrl: "",
@@ -66,7 +70,7 @@ export default class AndroidAudioPlayer extends Component<
         setInterval(() => {
             if (this.state.isPrepared && this.state.state === "play") {
                 this.setState({
-                    trackPosition: this.state.trackPosition+100,
+                    trackPosition: this.state.trackPosition + 100,
                 });
             }
             if (this.state.isPrepared && this.props.listenerToTrackProgress !== null) {
@@ -75,7 +79,7 @@ export default class AndroidAudioPlayer extends Component<
                     trackDuration: this.state.trackDuration,
                 });
             }
-            if(this.state.state ==="play" && (this.state.trackPosition >= this.state.trackDuration) && this.state.isPrepared){
+            if (this.state.state === "play" && (this.state.trackPosition >= this.state.trackDuration) && this.state.isPrepared) {
                 this.setState({
                     trackPosition: 0,
                     state: "pause",
@@ -120,6 +124,8 @@ export default class AndroidAudioPlayer extends Component<
     seekTo(msec: number) {
         this.setState({
             trackPosition: msec,
+            tempTrackStartPos: msec,
+            tempTrackStartTime: Date.now(),
             seekTo: true,
         });
     }
@@ -140,13 +146,18 @@ export default class AndroidAudioPlayer extends Component<
 
     playMusic() {
         this.setState({
-            state: "play"
+            state: "play",
+            tempTrackStartTime: Date.now(),
+            tempTrackStartPos: this.state.trackPosition
         });
     }
 
     pauseMusic() {
         this.setState({
             state: "pause",
+            seekTo: true,
+            trackPosition: (Date.now() - this.state.tempTrackStartTime) + this.state.tempTrackStartPos,
+            tempTrackStartPos: this.state.tempTrackStartTime - Date.now()
         });
     }
 

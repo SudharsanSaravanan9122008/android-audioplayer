@@ -81,7 +81,7 @@ export default class App extends Component {
               </View>
             ) : null
         }
-        <Button title='log' onPress={() => this.setState({})} />
+        
       </View>
     )
   }
