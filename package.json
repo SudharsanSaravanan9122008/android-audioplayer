@@ -1,11 +1,12 @@
 {
   "name": "android-audioplayer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This module has functions which can use multiple media players and return their AudioSessionId for usage in other modules.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
     "build": "expo-module build",
+    "start_android": "sh ./start_android.sh",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
     "test": "expo-module test",
@@ -13,7 +14,7 @@
     "prepublishOnly": "expo-module prepublishOnly",
     "expo-module": "expo-module",
     "open:ios": "open -a \"Xcode\" example/ios",
-    "open:android": "open -a \"Android Studio\" example/android"
+    "open:android": "nohup android-studio android &"
   },
   "keywords": [
     "react-native",

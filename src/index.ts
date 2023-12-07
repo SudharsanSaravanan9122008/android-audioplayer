@@ -73,6 +73,8 @@ export default class AndroidAudioPlayer extends Component<
                     trackPosition: this.state.trackPosition + 100,
                 });
             }
+        }, 100);
+        setInterval(()=>{
             if (this.state.isPrepared && this.props.listenerToTrackProgress !== null) {
                 this.props.listenerToTrackProgress({
                     trackPosition: this.state.trackPosition,
@@ -88,7 +90,7 @@ export default class AndroidAudioPlayer extends Component<
                 AAP.seekTo(this.state.playerId!, 0);
                 this.props.onPlaybackComplete();
             }
-        }, 100);
+        }, 500)
     }
 
     componentDidUpdate() {
