@@ -15,7 +15,8 @@ export default class App extends Component {
       state: "pause",
       tempTrackPosition: 0,
       tempTrackSliding: false,
-      isPlaybackComplete: false
+      isPlaybackComplete: false,
+      speed: 200
     }
     this.getAudioSessionIDSchedule;
     this.mediaPlayer = createRef();
@@ -32,10 +33,10 @@ export default class App extends Component {
               ...json
             })
           }}
-          onPlaybackComplete={()=>{
+          onPlaybackComplete={() => {
             this.setState({
               isPlaybackComplete: true,
-              state:"pause"
+              state: "pause"
             })
             console.warn("Playback completed");
           }}
@@ -46,8 +47,11 @@ export default class App extends Component {
               <View style={styles.playerContainer}>
                 <View style={{ width: "100%", flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
                   <TextInput placeholder="Enter link for track" onChangeText={text => this.setState({ trackUrl: text })} style={styles.textInput} />
-                  <Button title="set url" onPress={() => this.mediaPlayer.current.setTrackUrl(this.state.trackUrl)} />
+                  <Button title="set url" onPress={() => { this.mediaPlayer.current.setTrackUrl(this.state.trackUrl); }} />
                 </View>
+                <Button title="set speed to 50%" onPress={() => { this.mediaPlayer.current.setSpeed(0.5); }} />
+                <Button title="set speed to 100%" onPress={() => { this.mediaPlayer.current.setSpeed(1); }} />
+                <Button title="set speed to 200%" onPress={() => { this.mediaPlayer.current.setSpeed(2); }} />
                 <View style={{ width: "100%" }}>
                   <Slider step={1} maximumValue={this.state.trackDuration} minimumValue={0} value={this.state.trackPosition} onSlidingStart={() => {
                     this.setState({
@@ -81,7 +85,7 @@ export default class App extends Component {
               </View>
             ) : null
         }
-        
+
       </View>
     )
   }

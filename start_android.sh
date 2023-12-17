@@ -1,2 +1,2 @@
 cd /home/sudharsans912/Desktop/android-audioplayer/example
-npx expo run:android --device Pixel_default
+npx expo run:android --device

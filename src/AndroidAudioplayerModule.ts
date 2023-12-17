@@ -53,3 +53,7 @@ export function getPlaybackCurrentPosition(playerId: number): number{
 export function addOnPreparedListener(listener: (event: OnPreparedListener) => void): Subscription {
   return emitter.addListener<OnPreparedListener>('onPrepared', listener);
 }
+
+export function setSpeed(playerId: number, speed: number): number{
+  return AndroidAudioplayerModule.setSpeed(playerId, speed);
+}

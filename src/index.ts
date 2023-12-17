@@ -15,12 +15,14 @@ interface AndroidAudioPlayerState {
     tempTrackStartTime: number;
     tempTrackStartPos: number;
     seekTo: boolean;
-    playerId: number | null;
+    playerId: number;
     trackUrl: string;
     setUrl: boolean;
     state: "play" | "pause";
     audioSessionId: number
     isPrepared: boolean;
+    speed: number;
+    pitch: number
 }
 
 export default class AndroidAudioPlayer extends Component<
@@ -36,16 +38,19 @@ export default class AndroidAudioPlayer extends Component<
             tempTrackStartTime: 0,
             tempTrackStartPos: 0,
             seekTo: false,
-            playerId: null,
+            playerId: -1,
             trackUrl: "",
             setUrl: false,
             state: "pause",
             isPrepared: false,
-            audioSessionId: 0
+            audioSessionId: 0,
+            speed: 1,
+            pitch: 100
         };
         this.setTrackUrl = this.setTrackUrl.bind(this);
         this.playMusic = this.playMusic.bind(this);
         this.pauseMusic = this.pauseMusic.bind(this);
+        this.setSpeed = this.setSpeed.bind(this);
         this.getAudioSessionId = this.getAudioSessionId.bind(this);
     }
 
@@ -67,14 +72,14 @@ export default class AndroidAudioPlayer extends Component<
             this.props.onInitCallback(AAP.getAudioSessionId(id));
         };
 
-        setInterval(() => {
+        setInterval(async () => {
             if (this.state.isPrepared && this.state.state === "play") {
-                this.setState({
-                    trackPosition: this.state.trackPosition + 100,
+                await this.setState({
+                    trackPosition: this.state.trackPosition + (100 * this.state.speed),
                 });
             }
         }, 100);
-        setInterval(()=>{
+        setInterval(() => {
             if (this.state.isPrepared && this.props.listenerToTrackProgress !== null) {
                 this.props.listenerToTrackProgress({
                     trackPosition: this.state.trackPosition,
@@ -130,6 +135,16 @@ export default class AndroidAudioPlayer extends Component<
             tempTrackStartTime: Date.now(),
             seekTo: true,
         });
+    }
+
+    setSpeed(speedFactor: number) {
+        this.setState({
+            speed: speedFactor
+        });
+        console.log(this.state.playerId)
+        if(this.state.playerId !== -1){
+            AAP.setSpeed(this.state.playerId, speedFactor);
+        }
     }
 
     getState() {

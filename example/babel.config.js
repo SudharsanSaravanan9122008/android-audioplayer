@@ -13,7 +13,7 @@ module.exports = function (api) {
             'android-audioplayer': path.join(__dirname, '..', 'src', 'index.ts'),
           },
         },
-      ],
+              ],
     ],
   };
 };

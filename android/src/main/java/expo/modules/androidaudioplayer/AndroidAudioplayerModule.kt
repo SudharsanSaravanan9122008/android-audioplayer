@@ -3,6 +3,7 @@ package expo.modules.androidaudioplayer
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import android.media.MediaPlayer
+import android.media.PlaybackParams
 import android.media.AudioAttributes
 import androidx.core.os.bundleOf
 
@@ -82,6 +83,14 @@ class AndroidAudioplayerModule : Module() {
       playerId: Int -> mediaPlayers[playerId].apply{
         pause()
     }
+    }
+    Function("setSpeed"){
+      playerId: Int, speed: Float ->
+      var playbackParam = PlaybackParams()
+      playbackParam.allowDefaults()
+      playbackParam.setSpeed(speed)
+      mediaPlayers[playerId].setPlaybackParams(playbackParam)
+      playbackParam.getSpeed()
     }
   }
 }
