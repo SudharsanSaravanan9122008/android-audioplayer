@@ -12,6 +12,8 @@ class AndroidAudioplayerModule : Module() {
     Name("AndroidAudioplayer")
     Events("onPrepared")
     var mediaPlayers = arrayOf<MediaPlayer>()
+    var mediaPlayersSpeed = arrayOf<Float>()
+    var mediaPlayersPitch = arrayOf<Float>()
 
     fun createMediaPlayer(): Int{
       var mediaPlayer = MediaPlayer()
@@ -34,6 +36,8 @@ class AndroidAudioplayerModule : Module() {
       mediaPlayers[playerId].setOnPreparedListener{
         this@AndroidAudioplayerModule.sendEvent("onPrepared", bundleOf("playerId" to playerId))
       }
+      mediaPlayersPitch += 1.0f
+      mediaPlayersSpeed += 1.0f
     }
 
     Function("createMediaPlayer"){
@@ -89,8 +93,23 @@ class AndroidAudioplayerModule : Module() {
       var playbackParam = PlaybackParams()
       playbackParam.allowDefaults()
       playbackParam.setSpeed(speed)
+      playbackParam.setPitch(mediaPlayersPitch[playerId])
       mediaPlayers[playerId].setPlaybackParams(playbackParam)
-      playbackParam.getSpeed()
+      mediaPlayersSpeed[playerId] = speed
+    }
+    Function("setPitch"){
+      playerId: Int, pitch: Float ->
+      var playbackParam = PlaybackParams()
+      playbackParam.allowDefaults()
+      playbackParam.setSpeed(mediaPlayersSpeed[playerId])
+      playbackParam.setPitch(pitch)
+      mediaPlayers[playerId].setPlaybackParams(playbackParam)
+      mediaPlayersPitch[playerId] = pitch
+    }
+
+    Function("setLooping"){
+      playerId: Int, isLoop: Boolean ->
+      mediaPlayers[playerId].setLooping(isLoop)
     }
   }
 }

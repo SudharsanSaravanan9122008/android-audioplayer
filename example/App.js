@@ -1,4 +1,5 @@
 import React, { Component, createRef } from 'react';
+
 import { StyleSheet, View, Text, TextInput, Button } from 'react-native';
 import AndroidAudioPlayer from 'android-audioplayer';
 import { convertMillisToFormattedString } from 'android-audioplayer';
@@ -16,7 +17,9 @@ export default class App extends Component {
       tempTrackPosition: 0,
       tempTrackSliding: false,
       isPlaybackComplete: false,
-      speed: 200
+      speed: 100,
+      pitch: 100,
+      isLoop: false
     }
     this.getAudioSessionIDSchedule;
     this.mediaPlayer = createRef();
@@ -38,7 +41,7 @@ export default class App extends Component {
               isPlaybackComplete: true,
               state: "pause"
             })
-            console.warn("Playback completed");
+            console.log("Playback completed");
           }}
         />
         {
@@ -49,9 +52,12 @@ export default class App extends Component {
                   <TextInput placeholder="Enter link for track" onChangeText={text => this.setState({ trackUrl: text })} style={styles.textInput} />
                   <Button title="set url" onPress={() => { this.mediaPlayer.current.setTrackUrl(this.state.trackUrl); }} />
                 </View>
-                <Button title="set speed to 50%" onPress={() => { this.mediaPlayer.current.setSpeed(0.5); }} />
-                <Button title="set speed to 100%" onPress={() => { this.mediaPlayer.current.setSpeed(1); }} />
-                <Button title="set speed to 200%" onPress={() => { this.mediaPlayer.current.setSpeed(2); }} />
+                <Slider maximumValue={200} minimumValue={50} value={this.state.speed} onValueChange={value => { this.mediaPlayer.current.setSpeed(value / 100); this.setState({ speed: value }) }} style={{
+                  width: "100%"
+                }} />
+                <Slider maximumValue={200} minimumValue={50} value={this.state.pitch} onValueChange={value => { this.mediaPlayer.current.setPitch(value / 100); this.setState({ pitch: value }) }} style={{
+                  width: "100%"
+                }} />
                 <View style={{ width: "100%" }}>
                   <Slider step={1} maximumValue={this.state.trackDuration} minimumValue={0} value={this.state.trackPosition} onSlidingStart={() => {
                     this.setState({
@@ -76,6 +82,7 @@ export default class App extends Component {
                     <Text>{convertMillisToFormattedString(this.state.trackDuration)}</Text>
                   </View>
                 </View>
+                <Button title={`Loop ${this.state.isLoop?'On':'Off'}`} onPress={()=>{this.mediaPlayer.current.setLooping(!this.state.isLoop); this.setState({isLoop: !this.state.isLoop})}}/>
                 <Button title={this.state.state === "play" ? "pause" : "play"} onPress={() => {
                   this.state.state === "play" ? this.mediaPlayer.current.pauseMusic() : this.mediaPlayer.current.playMusic();
                   this.setState({

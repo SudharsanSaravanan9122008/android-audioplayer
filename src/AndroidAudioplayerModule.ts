@@ -46,7 +46,7 @@ export function releaseResources(playerId: number): void {
   AndroidAudioplayerModule.releaseResources(playerId);
 }
 
-export function getPlaybackCurrentPosition(playerId: number): number{
+export function getPlaybackCurrentPosition(playerId: number): number {
   return AndroidAudioplayerModule.getPlaybackCurrentPosition(playerId);
 }
 
@@ -54,6 +54,14 @@ export function addOnPreparedListener(listener: (event: OnPreparedListener) => v
   return emitter.addListener<OnPreparedListener>('onPrepared', listener);
 }
 
-export function setSpeed(playerId: number, speed: number): number{
+export function setSpeed(playerId: number, speed: number): void {
   return AndroidAudioplayerModule.setSpeed(playerId, speed);
+}
+
+export function setPitch(playerId: number, pitch: number): void {
+  return AndroidAudioplayerModule.setPitch(playerId, pitch);
+}
+
+export function setLooping(playerId: number, isLooping: boolean): void{
+  return AndroidAudioplayerModule.setLooping(playerId, isLooping);
 }

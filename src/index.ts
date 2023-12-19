@@ -22,14 +22,15 @@ interface AndroidAudioPlayerState {
     audioSessionId: number
     isPrepared: boolean;
     speed: number;
-    pitch: number
+    pitch: number;
+    isLoop: boolean;
 }
 
 export default class AndroidAudioPlayer extends Component<
     AndroidAudioPlayerProps,
     AndroidAudioPlayerState
 > {
-
+    private intervalId: number;
     constructor(props: AndroidAudioPlayerProps) {
         super(props);
         this.state = {
@@ -45,13 +46,16 @@ export default class AndroidAudioPlayer extends Component<
             isPrepared: false,
             audioSessionId: 0,
             speed: 1,
-            pitch: 100
+            pitch: 1,
+            isLoop: false
         };
         this.setTrackUrl = this.setTrackUrl.bind(this);
         this.playMusic = this.playMusic.bind(this);
         this.pauseMusic = this.pauseMusic.bind(this);
         this.setSpeed = this.setSpeed.bind(this);
         this.getAudioSessionId = this.getAudioSessionId.bind(this);
+        this.intervalId = setInterval(this.updateVariable, 1000 / this.state.speed);
+        this.setLooping = this.setLooping.bind(this);
     }
 
     componentDidMount() {
@@ -71,14 +75,6 @@ export default class AndroidAudioPlayer extends Component<
         if (this.props.onInitCallback !== null) {
             this.props.onInitCallback(AAP.getAudioSessionId(id));
         };
-
-        setInterval(async () => {
-            if (this.state.isPrepared && this.state.state === "play") {
-                await this.setState({
-                    trackPosition: this.state.trackPosition + (100 * this.state.speed),
-                });
-            }
-        }, 100);
         setInterval(() => {
             if (this.state.isPrepared && this.props.listenerToTrackProgress !== null) {
                 this.props.listenerToTrackProgress({
@@ -87,13 +83,20 @@ export default class AndroidAudioPlayer extends Component<
                 });
             }
             if (this.state.state === "play" && (this.state.trackPosition >= this.state.trackDuration) && this.state.isPrepared) {
-                this.setState({
-                    trackPosition: 0,
-                    state: "pause",
-                })
-                AAP.pauseMusic(this.state.playerId!);
-                AAP.seekTo(this.state.playerId!, 0);
-                this.props.onPlaybackComplete();
+                if (!this.state.isLoop) {
+                    this.setState({
+                        trackPosition: 0,
+                        state: "pause",
+                    })
+                    AAP.pauseMusic(this.state.playerId!);
+                    AAP.seekTo(this.state.playerId!, 0);
+                    this.props.onPlaybackComplete();
+                } else{
+                    this.setState({
+                        trackPosition: 0
+                    })
+                }
+
             }
         }, 500)
     }
@@ -119,7 +122,23 @@ export default class AndroidAudioPlayer extends Component<
                 }
             }
         }
+        AAP.setLooping(this.state.playerId, this.state.isLoop)
     }
+
+    componentWillUnmount(): void {
+        clearInterval(this.intervalId);
+    }
+
+    private updateVariable = () => {
+        if (this.state.state === "play") {
+            this.setState({ trackPosition: this.state.trackPosition + 500 });
+        }
+    };
+
+    private changeSpeed = (value: number) => {
+        clearInterval(this.intervalId);
+        this.intervalId = setInterval(this.updateVariable, 500 / value);
+    };
 
     setTrackUrl(url: string) {
         this.setState({
@@ -141,10 +160,17 @@ export default class AndroidAudioPlayer extends Component<
         this.setState({
             speed: speedFactor
         });
-        console.log(this.state.playerId)
-        if(this.state.playerId !== -1){
+        this.changeSpeed(speedFactor);
+        if (this.state.playerId !== -1) {
             AAP.setSpeed(this.state.playerId, speedFactor);
         }
+    }
+
+    setPitch(pitchFactor: number) {
+        this.setState({
+            pitch: pitchFactor
+        });
+        AAP.setPitch(this.state.playerId, pitchFactor);
     }
 
     getState() {
@@ -167,14 +193,18 @@ export default class AndroidAudioPlayer extends Component<
             tempTrackStartTime: Date.now(),
             tempTrackStartPos: this.state.trackPosition
         });
+        this.changeSpeed(this.state.speed);
+    }
+
+    setLooping(isLoop: boolean) {
+        this.setState({
+            isLoop: isLoop
+        });
     }
 
     pauseMusic() {
         this.setState({
             state: "pause",
-            seekTo: true,
-            trackPosition: (Date.now() - this.state.tempTrackStartTime) + this.state.tempTrackStartPos,
-            tempTrackStartPos: this.state.tempTrackStartTime - Date.now()
         });
     }
 
@@ -190,4 +220,18 @@ function convertMillisToFormattedString(millis: number) {
     return `${min}:${sec < 10 ? "0" + sec : sec}`;
 }
 
-export { convertMillisToFormattedString, playMusic, OnPreparedListener, createMediaPlayer, getAudioSessionId, setAudioTrackUrl, getPlaybackCurrentPosition, getPlaybackMaxDuration, seekTo, pauseMusic, stopMusic, releaseResources, addOnPreparedListener };
+export {
+    convertMillisToFormattedString,
+    playMusic,
+    OnPreparedListener,
+    createMediaPlayer,
+    getAudioSessionId,
+    setAudioTrackUrl,
+    getPlaybackCurrentPosition,
+    getPlaybackMaxDuration,
+    seekTo,
+    pauseMusic,
+    stopMusic,
+    releaseResources,
+    addOnPreparedListener
+};
