@@ -1,6 +1,6 @@
 {
   "name": "android-audioplayer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "This module has functions which can use multiple media players and return their AudioSessionId for usage in other modules.",
   "main": "build/index.js",
   "types": "build/index.d.ts",
